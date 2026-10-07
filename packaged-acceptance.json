@@ -1,0 +1,7 @@
+{
+  "packagedStartup": "passed",
+  "installerInstall": "passed",
+  "installedStartup": "passed",
+  "installerUninstall": "passed",
+  "registryChangesApplied": false
+}
