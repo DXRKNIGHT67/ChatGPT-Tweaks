@@ -37,6 +37,8 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      - name: Packaged desktop and installer install-launch-uninstall acceptance
+        run: node tests/packaged.integration.cjs
       - name: Record actual executable signatures
         shell: pwsh
         run: |
@@ -52,6 +54,7 @@ jobs:
             dist/SHA256SUMS.txt
             validation-windows.xml
             validation-report.json
+            packaged-acceptance.json
       - name: Publish validated downloads to dedicated branch
         shell: pwsh
         run: |

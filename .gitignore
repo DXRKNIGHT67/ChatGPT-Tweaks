@@ -5,3 +5,5 @@ dist/
 validation-report.json
 validation-windows.xml
 signature-report.json
+build-diagnostics.json
+packaged-acceptance.json
