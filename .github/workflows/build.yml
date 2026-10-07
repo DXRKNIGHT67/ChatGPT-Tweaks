@@ -55,17 +55,26 @@ jobs:
             validation-windows.xml
             validation-report.json
             packaged-acceptance.json
-      - name: Publish validated downloads to dedicated branch
+      - name: Publish a validated GitHub release
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git switch -C agent-tweaks-v2-release
-          New-Item -ItemType Directory -Force downloads | Out-Null
-          Copy-Item dist/*.exe downloads/
-          Copy-Item dist/SHA256SUMS.txt downloads/
-          Copy-Item validation-windows.xml downloads/
-          Copy-Item validation-report.json downloads/
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add downloads
-          git commit -m 'Publish Windows-validated Agent Tweaks build'
-          git push origin HEAD:refs/heads/agent-tweaks-v2-release
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $tag = "v$version"
+          $existingTags = @(gh release list --limit 100 --json tagName --jq '.[].tagName')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($existingTags -contains $tag) {
+            Write-Host 'This version is already released. Bump package.json version to publish another release.'
+            exit 0
+          }
+          @(
+            "Agent Tweaks $version — Your path for glory."
+            'Windows registry/scanner tests, native and packaged startup, installer install/launch/uninstall, and checksum verification passed.'
+            'See validation-report.json for the exact source commit, acceptance results and actual signing status.'
+            'Game FPS and ping gains have not been benchmarked on your PC and are not guaranteed. Windows reputation warnings can remain for new or unsigned releases.'
+          ) | Set-Content release-notes.md
+          $assets = @(Get-ChildItem dist/*.exe | ForEach-Object { $_.FullName })
+          $assets += @('dist/SHA256SUMS.txt', 'validation-report.json', 'validation-windows.xml', 'packaged-acceptance.json')
+          gh release create $tag @assets --target $env:GITHUB_SHA --title "Agent Tweaks $version — Your path for glory" --notes-file release-notes.md
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

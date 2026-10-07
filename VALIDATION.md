@@ -17,7 +17,7 @@
 4. Actual Electron desktop launch, real scanner/preload IPC, and invalid-request rejection.
 5. Windows installer/portable build and PE/checksum verification.
 
-A successful run publishes `validation-report.json`, `validation-windows.xml`, checksums, and builds to the `agent-tweaks-v2-release` branch. The report names the exact source commit. Presence of a workflow is not itself proof it passed; inspect that report and the run outcome.
+A successful run publishes `validation-report.json`, `validation-windows.xml`, checksums, and builds to GitHub Releases. The report names the exact source commit. Presence of a workflow is not itself proof it passed; inspect that report and the run outcome.
 
 ## Limits
 
@@ -28,3 +28,5 @@ Real Windows registry integration confirms storage/rollback behavior, not policy
 [Windows validation run](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/actions/runs/37663287472) passed the unit, registry/scanner/power, UI, native Electron, build, packaged startup, installer installation, installed startup, uninstall, signature recording, and distribution verification steps for source `d849d932e3efcbe0a7a49e86fd32c2e2fe3c434d`. Its final repository-file publication failed, so `.github/workflows/publish-release.yml` retrieves the saved validated artifact, verifies its source/acceptance/checksums, and publishes the same files to GitHub Releases. This does not treat the failed overall job as a complete successful run.
 
 The installed-app test caught and led to a fix for Windows short-name path canonicalization in the strict IPC guard. Remote/other files and subframes remain blocked. A fresh recovery directory is created before overriding Electron's storage path.
+
+The verified v2 release is now available at https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/tag/v2.0.0. Its release publishing job passed source/acceptance/hash validation and asset upload. Both executable signatures are recorded as `NotSigned`. Future versions use the normal Windows workflow's explicit release publication; existing release versions are preserved.

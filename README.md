@@ -41,7 +41,7 @@ npm run build:win
 
 `npm run build:portable` builds a portable Windows executable from Linux without Wine. `dist/` contains generated executables. Linux displays real CPU/RAM in an explicitly labeled preview; it cannot apply Windows settings. Linux UI tests use `/usr/bin/chromium` by default; override `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` where needed. On Windows install the test browser with `npx playwright install chromium`.
 
-The GitHub Actions workflow runs unit/UI tests, real Windows scan and sandboxed-registry roundtrips, actual Electron startup, and builds. Only successful jobs publish their distribution and validation report to GitHub Releases. Registry integration tests map every registry option to an isolated temporary test subtree rather than altering the runner's normal settings. Power tests restore the original active plan.
+The GitHub Actions workflow runs unit/UI tests, real Windows scan and sandboxed-registry roundtrips, actual Electron startup, builds, and packaged-app installation/launch/uninstall acceptance. Only successful jobs publish their distribution and validation report to GitHub Releases. Registry integration tests map every registry option to an isolated temporary test subtree rather than altering the runner's normal settings. Power tests restore the original active plan.
 
 ## Use
 
