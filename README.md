@@ -4,12 +4,12 @@ A Windows desktop performance toolkit with a black-and-blue command center, your
 
 ## Validated Windows downloads
 
-Published after the Windows validation workflow succeeds:
+The Windows-tested 2.0.0 build is published to GitHub Releases:
 
-- [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/agent-tweaks-v2-release/downloads/Agent-Tweaks-2.0.0-x64-Setup.exe)
-- [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/agent-tweaks-v2-release/downloads/Agent-Tweaks-2.0.0-x64-Portable.exe)
-- [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/blob/agent-tweaks-v2-release/downloads/validation-report.json)
-- [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/blob/agent-tweaks-v2-release/downloads/validation-windows.xml)
+- [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/Agent-Tweaks-2.0.0-x64-Setup.exe)
+- [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/Agent-Tweaks-2.0.0-x64-Portable.exe)
+- [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/validation-report.json)
+- [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/validation-windows.xml)
 
 Links are available only after a successful publishing job. Unsigned builds can still display browser/SmartScreen warnings. Check the report's signing status; no security protection should be disabled.
 
@@ -41,7 +41,7 @@ npm run build:win
 
 `npm run build:portable` builds a portable Windows executable from Linux without Wine. `dist/` contains generated executables. Linux displays real CPU/RAM in an explicitly labeled preview; it cannot apply Windows settings. Linux UI tests use `/usr/bin/chromium` by default; override `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` where needed. On Windows install the test browser with `npx playwright install chromium`.
 
-The GitHub Actions workflow runs unit/UI tests, real Windows scan and sandboxed-registry roundtrips, actual Electron startup, and builds. Only successful jobs publish their distribution and validation report to the `agent-tweaks-v2-release` branch. Registry integration tests map every registry option to an isolated temporary test subtree rather than altering the runner's normal settings. Power tests restore the original active plan.
+The GitHub Actions workflow runs unit/UI tests, real Windows scan and sandboxed-registry roundtrips, actual Electron startup, and builds. Only successful jobs publish their distribution and validation report to GitHub Releases. Registry integration tests map every registry option to an isolated temporary test subtree rather than altering the runner's normal settings. Power tests restore the original active plan.
 
 ## Use
 

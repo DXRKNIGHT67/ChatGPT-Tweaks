@@ -1,0 +1,51 @@
+name: Publish Windows-validated v2 download
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-release.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: DXRKNIGHT67/ChatGPT-Tweaks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Retrieve the tested Windows distribution
+        run: gh run download 37663287472 --name Agent-Tweaks-Windows-validated --dir recovered
+      - name: Verify source, acceptance and file checksums
+        run: |
+          node <<'JS'
+          const fs=require('node:fs');const crypto=require('node:crypto');const assert=require('node:assert/strict');const path=require('node:path');
+          const report=JSON.parse(fs.readFileSync('recovered/validation-report.json','utf8'));
+          assert.equal(report.commit,'d849d932e3efcbe0a7a49e86fd32c2e2fe3c434d');
+          assert.equal(report.version,'2.0.0');assert.equal(report.windowsIntegration,'passed');
+          for(const key of ['packagedStartup','installerInstall','installedStartup','installerUninstall'])assert.equal(report.packagedAcceptance[key],'passed');
+          const lines=fs.readFileSync('recovered/dist/SHA256SUMS.txt','utf8').trim().split(/\r?\n/);assert.equal(lines.length,2);
+          for(const line of lines){const match=/^([a-f0-9]{64})  (Agent-Tweaks-2\.0\.0-x64-(?:Setup|Portable)\.exe)$/.exec(line);assert.ok(match);const bytes=fs.readFileSync(path.join('recovered/dist',match[2]));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),match[1]);assert.equal(bytes.subarray(0,2).toString(),'MZ');}
+          console.log('Verified: exact Windows-tested source, all acceptance checks, and both executable hashes.');
+          JS
+      - name: Prepare release notes
+        run: |
+          cat > release-notes.md <<'NOTES'
+          Agent Tweaks — Your path for glory, version 2.0.0.
+
+          68 reversible options, hardware-aware profiles, black/blue desktop UI, automatic hardware scan, verified recovery, connection measurements and a benchmark journal.
+
+          Windows validation passed: 29 regression tests, every registry option in an isolated test subtree, exact value/type restoration, hardware scan and power recovery, UI checks, actual Electron startup, packaged startup, silent installation, installed startup and uninstallation.
+
+          Source: d849d932e3efcbe0a7a49e86fd32c2e2fe3c434d. Checksums and test/signing reports are attached.
+
+          This build is unsigned. Windows/browser reputation warnings can remain; no protection should be disabled. Game FPS, frame-time and ping gains have not been benchmarked on your PC and are not guaranteed.
+          NOTES
+      - name: Publish the verified Windows assets
+        run: |
+          gh release create v2.0.0 --target d849d932e3efcbe0a7a49e86fd32c2e2fe3c434d --title 'Agent Tweaks 2.0 — Your path for glory' --notes-file release-notes.md recovered/dist/Agent-Tweaks-2.0.0-x64-Setup.exe recovered/dist/Agent-Tweaks-2.0.0-x64-Portable.exe recovered/dist/SHA256SUMS.txt recovered/validation-report.json recovered/validation-windows.xml recovered/packaged-acceptance.json
