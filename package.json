@@ -36,13 +36,16 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "artifactName": "Agent-Tweaks-${version}-${arch}-Setup.${ext}"
     },
     "linux": {
       "target": "dir",
       "icon": "src/icon.png"
     },
     "compression": "normal",
-    "artifactName": "Agent-Tweaks-${version}-${arch}-${target}.${ext}"
+    "portable": {
+      "artifactName": "Agent-Tweaks-${version}-${arch}-Portable.${ext}"
+    }
   }
 }
