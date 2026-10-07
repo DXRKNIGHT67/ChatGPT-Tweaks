@@ -2,7 +2,13 @@
 
 A black-and-blue Windows desktop optimizer with a local hardware scan, 60 opt-in registry settings, recommended profiles, review-before-apply, per-setting results, and original-value recovery.
 
-## Download / build
+## Download
+
+[Download Agent Tweaks for Windows x64](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/main/downloads/Agent-Tweaks-1.0.0.exe) · [Download source pack](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/main/downloads/Agent-Tweaks-Source.zip)
+
+The portable executable is unsigned and does not require an installer. Windows registry apply/restore and scanner integration still require Windows testing; see VALIDATION.md. Download and run it on Windows, not inside this chat.
+
+## Build
 
 Requires Windows 10 or 11 x64 for hardware scanning and applying settings. Node.js 22+ is required only for development.
 
