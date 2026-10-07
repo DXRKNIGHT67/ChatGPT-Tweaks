@@ -1,6 +1,6 @@
 {
   "name": "agent-tweaks",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Agent Tweaks \u2014 Your path for glory",
   "main": "src/main.cjs",
   "author": "Agent Tweaks",
@@ -10,11 +10,14 @@
     "test": "node --test tests/*.test.cjs",
     "build:win": "electron-builder --win nsis --x64",
     "build:linux": "electron-builder --linux dir",
-    "build:portable": "electron-builder --win portable --x64 --config.win.signAndEditExecutable=false"
+    "build:portable": "electron-builder --win portable --x64 --config.win.signAndEditExecutable=false",
+    "test:windows": "node --test tests/windows.integration.cjs",
+    "test:ui": "node tests/ui-smoke.cjs"
   },
   "devDependencies": {
-    "electron": "^38.0.0",
-    "electron-builder": "^26.0.12"
+    "electron": "44.6.0",
+    "electron-builder": "26.15.3",
+    "playwright": "1.58.2"
   },
   "build": {
     "appId": "com.agenttweaks.desktop",
@@ -38,6 +41,8 @@
     "linux": {
       "target": "dir",
       "icon": "src/icon.png"
-    }
+    },
+    "compression": "normal",
+    "artifactName": "Agent-Tweaks-${version}-${arch}-${target}.${ext}"
   }
 }

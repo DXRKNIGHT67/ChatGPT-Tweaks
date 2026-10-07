@@ -1,0 +1,3 @@
+'use strict';const test=require('node:test');const assert=require('node:assert/strict');const {compare}=require('../src/benchmark.js');
+test('benchmark calculates only supplied measurements, including regressions',()=>{const r=compare({game:'Test',beforeFps:100,beforeLow:60,afterFps:90,afterLow:66});assert.equal(r.averageChange,-10);assert.equal(r.lowChange,10);});
+test('benchmark rejects impossible or missing values',()=>{const input={game:'Test',beforeFps:100,beforeLow:60,afterFps:110,afterLow:63};for(const bad of [{beforeFps:0},{beforeLow:200},{game:''},{afterFps:NaN},{afterLow:6000}])assert.throws(()=>compare({...input,...bad}));});

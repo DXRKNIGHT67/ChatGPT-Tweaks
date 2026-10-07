@@ -1,45 +1,49 @@
 # Agent Tweaks — Your path for glory
 
-A black-and-blue Windows desktop optimizer with a local hardware scan, 60 opt-in registry settings, recommended profiles, review-before-apply, per-setting results, and original-value recovery.
+A Windows desktop performance toolkit with a black-and-blue command center, your actual hardware, a 68-option tweak library, and verified recovery. Version 2 replaces the original engine rather than just changing the interface.
 
-## Download
+## What improved
 
-[Download Agent Tweaks for Windows x64](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/main/downloads/Agent-Tweaks-1.0.0.exe) · [Download source pack](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/main/downloads/Agent-Tweaks-Source.zip)
+- **Hardware-aware profiles:** scans CPU/threads, GPU names/drivers, physical RAM, disk usage, Windows build, network adapters, installed Edge/Office and available power plans. Unsupported settings are disabled. Ryzen and NVIDIA rigs receive targeted guidance.
+- **68 reversible options:** gaming/capture controls, desktop preferences, background browser policies, Windows suggestion debloat, privacy choices, and Balanced/High performance power plans. These categories have different effects; privacy preferences are not advertised as FPS boosts.
+- **Performance mode:** selects applicable gaming/background options and Balanced power for modern Ryzen desktops. High performance remains an optional desktop benchmark candidate, not a universal recommendation.
+- **A durable recovery journal:** saves original value and type before writes, verifies writes and restores, preserves failed operations for recovery, imports v1 backups, and detects external changes instead of overwriting newer user choices.
+- **Actual state:** applied-write counts, pending recovery records, and persistent per-setting operation history are separate.
+- **Live local telemetry:** CPU and RAM use. No invented GPU load or optimization score.
+- **Connection lab:** five TCP probes, median/range/spread and failed connections, clearly distinguished from game ping and packet loss.
+- **Benchmark journal:** compares FPS and 1% low measurements entered from your game's benchmark. Results are not fabricated or measured by the app itself.
+- **Protected desktop:** sandboxed renderer, strict IPC origin checks, allowlisted settings/actions, single-instance mutation lock, pinned Electron and dependencies, and no antivirus/security bypasses.
 
-The portable executable is unsigned and does not require an installer. Windows registry apply/restore and scanner integration still require Windows testing; see VALIDATION.md. Download and run it on Windows, not inside this chat.
+## Development and builds
 
-## Build
-
-Requires Windows 10 or 11 x64 for hardware scanning and applying settings. Node.js 22+ is required only for development.
+Windows 10/11 x64 and Windows PowerShell are required to apply optimizations. Node.js 22+ is needed only for development.
 
 ```sh
 npm ci
 npm test
+npm run test:ui
+npm run test:windows  # actual Windows only
+node tests/electron.integration.cjs  # actual desktop startup on Windows
 npm start
 npm run build:win
 ```
 
-The downloadable installer is produced in `dist/` on Windows. `npm run build:portable` produces a portable Windows executable on Linux without Wine. Install it and launch **Agent Tweaks**. Scan your PC, choose Recommended or Performance mode, review each selected change, and apply. Sign out or restart afterward. Recovery restores original registry values. No administrator rights are required for the included per-user tweaks.
+`npm run build:portable` builds a portable Windows executable from Linux without Wine. `dist/` contains generated executables. Linux displays real CPU/RAM in an explicitly labeled preview; it cannot apply Windows settings. Linux UI tests use `/usr/bin/chromium` by default; override `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` where needed. On Windows install the test browser with `npx playwright install chromium`.
 
-The Windows installer is unsigned. Public distribution should follow testing on supported Windows versions and code signing by the publisher. Hardware scanning needs Windows PowerShell, CIM, and the NetAdapter module. Non-Windows systems display their real CPU/RAM with explicit preview labels and cannot apply changes.
+The GitHub Actions workflow runs unit/UI tests, real Windows scan and sandboxed-registry roundtrips, actual Electron startup, and builds. Only successful jobs publish their distribution and validation report to the `agent-tweaks-v2-release` branch. Registry integration tests map every registry option to an isolated temporary test subtree rather than altering the runner's normal settings. Power tests restore the original active plan.
 
-## What it does
+## Use
 
-- Detects CPU, GPU name/driver, physical RAM, disks/free space, OS/build, chassis type, active adapters, and CPU/RAM usage.
-- 60 settings covering capture, mouse acceleration, desktop visual effects, suggestions, optional browser background features, and privacy.
-- Select all, category/search filtering, Recommended, and a desktop-aware Performance profile.
-- Writes only current-user registry values. Saves the first original value and type before writing, reads back each applied value, and reports individual failures.
-- Network TCP connection measurement with a clearly named endpoint. Not a game ping or FPS benchmark.
-- Links to Windows graphics, network, app uninstall, and startup settings.
+Scan your PC → select Recommended or Performance mode → review → apply. No changes happen just by opening the app. Select all selects compatible settings and only one power plan; read feature tradeoffs. Restart the game or sign out when needed. Recovery restores original values and reports conflicts rather than replacing external changes. Export diagnostics locally if you want a readable record.
 
-`dashboard-preview.png` is an interface screenshot using simulated hardware supplied in the request; the shipped app scans the actual machine.
+Backups remain under `%APPDATA%\agent-tweaks\recovery-v2.json`. Existing v1 backup files in `%APPDATA%\agent-tweaks` or `%APPDATA%\Agent Tweaks` are supported. Keep recovery files until all originals are restored. Empty created registry keys can remain after removing a value. Do not manually modify journals. Benchmark entries stay in local renderer storage. A requested network test contacts Cloudflare `1.1.1.1:443`. Hardware data is not uploaded.
 
-## Scope and limitations
+## Performance and trust
 
-This is a first release. The catalog and UI can be validated on Linux; real registry apply/restore and hardware scanning require Windows validation. The GPU scan does not claim VRAM capacity (WMI memory reporting can be wrong on modern GPUs). No fake hardware or performance score is displayed. Your Ryzen 5 8400F / RTX 5060 Ti / 32 GB machine will be scanned rather than hardcoded for everyone.
+For Ryzen 5 8400F / RTX 5060 Ti / 32 GB, retain a system-managed page file, use current AMD chipset/NVIDIA drivers, test in-game Reflex/DLSS, verify refresh rate, and watch VRAM consumption in your game. WMI GPU memory is unreliable, so the scanner does not claim an exact VRAM amount. Policies vary by Windows edition/application management status; a verified registry value does not prove the OS honors every policy.
 
-Policies vary by Windows build/edition and installed software. A registry read-back verifies the write, not that Windows honors every policy. No FPS or ping gain is guaranteed. Suggested-content settings are lightweight debloat; the app does not bulk uninstall apps or disable core services. Defender, updates, networking services, page files, HPET, timer resolution, IRQ configuration, and security mitigations are not changed.
+No registry pack can guarantee large FPS gains or remove routing/server latency. Compare repeated, identical game scenes and 1% lows. Defender, updates, core services, interrupt routing, HPET, forced timers, and security mitigations are left alone.
 
-Backups live in Electron's user-data directory (`%APPDATA%/Agent Tweaks` or `%APPDATA%/agent-tweaks`, depending on packaging), in `registry-backup.json`. Keep this file until restoration. A backed-up setting can include a failed write; restoration is intentionally offered for it. Avoid manually editing that file. Registry keys created by the app may remain empty after restore. The app neither collects nor uploads hardware information; the connection test contacts Cloudflare 1.1.1.1:443 only when requested.
+SmartScreen/browser reputation warnings cannot be eliminated with app code. Public releases need a real publisher code-signing certificate and reputation. The workflow can use optional `WINDOWS_CERTIFICATE` and `WINDOWS_CERTIFICATE_PASSWORD` repository secrets for signing; without them it produces an unsigned build and records that fact. It does not claim signing occurred or ask you to disable protection.
 
-For latency, favor Ethernet, avoid saturated uploads/downloads, select a nearby game server, and use NVIDIA Reflex in supported games. DNS/registry settings cannot eliminate internet routing delay. Benchmark average FPS and 1% lows before/after with the same game scene.
+See [VALIDATION.md](VALIDATION.md) for current evidence. Preview screenshots use explicit test hardware fixtures and are design examples, not a scan of the build host.

@@ -1,23 +1,68 @@
-name: Build Windows installer
+name: Validate and publish Agent Tweaks
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths-ignore: ['downloads/**', 'dashboard-preview.png']
+permissions:
+  contents: write
+concurrency:
+  group: agent-tweaks-windows
+  cancel-in-progress: true
 jobs:
   windows:
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build:win
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Engine and profile regression tests
+        run: npm test
+      - name: Real Windows scan, registry roundtrip and power plan tests
+        run: node --test --test-reporter=junit --test-reporter-destination=validation-windows.xml tests/windows.integration.cjs
+      - name: Desktop interface tests
+        run: |
+          npx playwright install chromium
+          npm run test:ui
+      - name: Actual Electron desktop startup and protected IPC
+        run: node tests/electron.integration.cjs
+      - name: Build Windows installer and portable app
+        run: npx electron-builder --win nsis portable --x64
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      - name: Record actual executable signatures
+        shell: pwsh
+        run: |
+          $signatures = @(Get-ChildItem dist/*.exe | ForEach-Object { $signature = Get-AuthenticodeSignature $_.FullName; @{ file=$_.Name; status=[string]$signature.Status } })
+          ConvertTo-Json -InputObject $signatures | Set-Content signature-report.json
+      - name: Verify distribution
+        run: node scripts/verify-build.cjs
       - uses: actions/upload-artifact@v4
         with:
-          name: Agent-Tweaks-Windows
-          path: dist/*.exe
+          name: Agent-Tweaks-Windows-validated
+          path: |
+            dist/*.exe
+            dist/SHA256SUMS.txt
+            validation-windows.xml
+            validation-report.json
+      - name: Publish validated downloads to dedicated branch
+        shell: pwsh
+        run: |
+          git switch -C agent-tweaks-v2-release
+          New-Item -ItemType Directory -Force downloads | Out-Null
+          Copy-Item dist/*.exe downloads/
+          Copy-Item dist/SHA256SUMS.txt downloads/
+          Copy-Item validation-windows.xml downloads/
+          Copy-Item validation-report.json downloads/
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add downloads
+          git commit -m 'Publish Windows-validated Agent Tweaks build'
+          git push origin HEAD:refs/heads/agent-tweaks-v2-release

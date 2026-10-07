@@ -48,5 +48,47 @@ reg('accessibility','Disable Sticky Keys hotkey','Gaming','HKCU:\\Control Panel\
 reg('filter-keys','Disable Filter Keys hotkey','Gaming','HKCU:\\Control Panel\\Accessibility\\Keyboard Response','Flags','122','Prevents holding Shift from enabling Filter Keys. Changes accessibility behavior.');
 reg('toggle-keys','Disable Toggle Keys hotkey','Gaming','HKCU:\\Control Panel\\Accessibility\\ToggleKeys','Flags','58','Disables the Toggle Keys hotkey. Changes accessibility behavior.');
 for(const t of tweaks) if(typeof t.value==='string') t.type='String';
-function recommendedIds(scan){return tweaks.filter(t=>t.recommended && (!scan || scan.platform==='win32')).map(t=>t.id);}
-module.exports={tweaks,recommendedIds};
+
+reg('game-mode-auto','Allow automatic Game Mode','Gaming',cv+'\\GameBar','AllowAutoGameMode',1,'Allows Windows to recognize supported games. Restart the game afterward.',true);
+reg('record-history','Disable historical gameplay capture','Gaming',cv+'\\GameDVR','HistoricalCaptureEnabled',0,'Stops keeping recent gameplay ready for replay. You lose retrospective clips.',true);
+reg('capture-audio','Disable game-capture audio recording','Gaming',cv+'\\GameDVR','AudioCaptureEnabled',0,'Stops Windows capture from recording audio. Does not affect game audio playback.');
+reg('capture-microphone','Disable capture microphone recording','Gaming',cv+'\\GameDVR','MicrophoneCaptureEnabled',0,'Stops Windows capture from recording your microphone. Does not affect voice chat.');
+reg('capture-cursor','Disable capture cursor recording','Gaming',cv+'\\GameDVR','CursorCaptureEnabled',0,'Hides the cursor in Windows gameplay captures. Does not change game input.');
+reg('capture-broadcast','Disable Windows capture broadcasting','Gaming',cv+'\\GameDVR','BroadcastEnabled',0,'Turns off the Windows game-capture broadcast setting on supported builds.');
+for(const [id,name,guid,description] of [
+ ['power-balanced','Use Balanced power plan','381b4222-f694-41f0-9685-ff5bb260df2e','Good starting point for modern Ryzen desktops. Lets the CPU boost while reducing idle power. Your original plan is backed up.'],
+ ['power-high','Use High performance power plan','8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c','Optional benchmark candidate for desktops with sufficient cooling. Raises idle power and heat; may not improve FPS. Only shown if Windows provides this plan.']
+]) tweaks.push({id,name,category:'Power',action:'power',value:guid,description,exclusive:'Power plan',recommended:id==='power-balanced',restart:false});
+for(const t of tweaks){
+ t.action??='registry';t.minBuild??=10240;t.impact=t.category==='Gaming'?'Gaming feature':t.category==='Power'?'Power / heat':t.category==='Privacy'?'Privacy':'Background / interface';
+ t.caution=t.category==='Privacy'?'Privacy setting; no direct FPS claim.':t.category==='Power'?'Benchmark after changing.':t.category==='Debloat'?'May hide or disable a feature you use.':'Review the feature tradeoff.';
+ if(['mouse','mouse1','mouse2'].includes(t.id))t.recommended=false;
+ if(['widgets','chat'].includes(t.id))t.minBuild=22000;
+ if(t.id==='chat')t.maxBuild=22631;
+ if(t.id.startsWith('edge-'))t.requires='edge';
+ if(t.id.startsWith('office-'))t.requires='office';
+}
+function available(t,scan){
+ if(!scan||scan.platform!=='win32'||!scan.scanComplete)return {available:false,reason:'Complete a successful Windows hardware scan first.'};
+ if(Number(scan.build)<t.minBuild || (t.maxBuild&&Number(scan.build)>t.maxBuild))return {available:false,reason:'Not applicable to this Windows build.'};
+ if(t.requires&&!scan.software?.[t.requires])return {available:false,reason:'Required application was not detected.'};
+ if(t.action==='power'&&!scan.powerPlans?.some(p=>p.guid===t.value))return {available:false,reason:'Windows does not provide this power plan.'};
+ if(t.id==='power-high'&&!scan.desktop)return {available:false,reason:'High performance is opt-in for desktop PCs only.'};
+ return {available:true,reason:''};
+}
+function recommendedIds(scan,mode='recommended'){
+ return tweaks.filter(t=>t.recommended&&available(t,scan).available&&(mode!=='performance'||['Gaming','Power'].includes(t.category)||['edge-background','edge-startup'].includes(t.id))).map(t=>t.id);
+}
+function profile(scan,mode='recommended'){
+ const ids=recommendedIds(scan,mode);const tips=[];
+ if(!scan?.scanComplete||scan.platform!=='win32')return {ids:[],tips:['A complete Windows scan is required before making recommendations.']};
+ if(/Ryzen/i.test(scan.cpu))tips.push('Ryzen: start with Balanced power and current AMD chipset drivers.');
+ if(scan.gpu.some(g=>/NVIDIA/i.test(g.name)))tips.push('NVIDIA: enable Reflex in supported games; test DLSS and a stable frame cap.');
+ if(scan.gpu.some(g=>/5060 Ti/i.test(g.name)))tips.push('RTX 5060 Ti: monitor VRAM usage in your games; reduce textures if the 8 GB model is saturated.');
+ if(scan.ram>=24*2**30)tips.push('32 GB class memory: retain the system-managed page file; do not use RAM cleaners.');
+ if(scan.disks.some(d=>d.total>0&&d.free/d.total<0.15))tips.push('A drive has less than 15% free space. Review storage before adding more games.');
+ if(scan.network.some(n=>/Wi-Fi|Wireless|802\.11/i.test(n.description||'')))tips.push('Wireless connection detected: Ethernet can reduce local jitter and interference.');
+ if(scan.hags!==undefined)tips.push('Hardware GPU scheduling is a per-game benchmark choice; the app leaves it unchanged.');
+ return {ids,tips};
+}
+module.exports={tweaks,recommendedIds,available,profile};
