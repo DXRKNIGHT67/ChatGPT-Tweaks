@@ -1,0 +1,10 @@
+{
+  "status": "failed",
+  "stage": "installed desktop startup",
+  "error": "EBUSY: resource busy or locked, rmdir 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\AgentTweaksAcceptance-da2da09f-b1d9-43c8-8008-b46cf400e29a'",
+  "desktopDetails": {
+    "title": "Agent Tweaks — Your path for glory",
+    "scanBadge": "SCAN FAILED",
+    "banner": "Recovery data could not be loaded. Error invoking remote method 'catalog': Error: Untrusted application frame"
+  }
+}
