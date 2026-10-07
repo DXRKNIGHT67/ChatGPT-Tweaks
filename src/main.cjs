@@ -1,13 +1,13 @@
 'use strict';
 const {app,BrowserWindow,ipcMain,shell,dialog}=require('electron');
-const os=require('node:os');const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
+const os=require('node:os');const path=require('node:path');const fs=require('node:fs/promises');const {trustedFileURL}=require('./trusted-frame.cjs');
 const {tweaks,available,profile}=require('./catalog.cjs');const {Engine,Journal}=require('./engine.cjs');const {WindowsAdapter}=require('./windows-adapter.cjs');const {runPowerShell}=require('./powershell.cjs');const {measure}=require('./network.cjs');
-const index=path.join(__dirname,'index.html');const trustedURL=pathToFileURL(index).href;
+const index=path.join(__dirname,'index.html');
 let engine,win,lastScan,networkBusy=false,previousCPU;
 const storage=path.join(app.getPath('appData'),'agent-tweaks');
 require('node:fs').mkdirSync(storage,{recursive:true});
 app.setPath('userData',storage);
-function handler(channel,fn){ipcMain.handle(channel,async(event,...args)=>{if(event.senderFrame?.url!==trustedURL)throw new Error('Untrusted application frame');return fn(...args);});}
+function handler(channel,fn){ipcMain.handle(channel,async(event,...args)=>{if(event.sender!==win?.webContents||event.senderFrame!==event.sender.mainFrame||!trustedFileURL(event.senderFrame?.url,index))throw new Error('Untrusted application frame');return fn(...args);});}
 async function scan(){lastScan=undefined;if(process.platform!=='win32'){lastScan={platform:process.platform,scanComplete:false,cpu:os.cpus()[0]?.model||'Unknown',cores:os.cpus().length,logicalCores:os.cpus().length,ram:os.totalmem(),ramUsed:os.totalmem()-os.freemem(),gpu:[],disks:[],network:[],powerPlans:[],os:os.type(),desktop:false,preview:true,warnings:['Windows is required to scan GPU/drives and apply optimizations.']};return lastScan;}
  const script=await fs.readFile(path.join(__dirname,'../scripts/scan.ps1'),'utf8');const result=JSON.parse(await runPowerShell(script,{timeout:45000}));if(!result.scanComplete||!result.cpu||!Number.isFinite(result.ram)||result.ram<=0||!Array.isArray(result.gpu)||!Array.isArray(result.disks))throw new Error('Hardware scan returned incomplete data. Applying tweaks is disabled.');lastScan=result;return result;}
 function metrics(){const cpu=os.cpus().reduce((v,c)=>{v.idle+=c.times.idle;v.total+=Object.values(c.times).reduce((a,b)=>a+b,0);return v;},{idle:0,total:0});let load=null;if(previousCPU){const delta=cpu.total-previousCPU.total;if(delta>0)load=Math.max(0,Math.min(100,Math.round(100*(1-(cpu.idle-previousCPU.idle)/delta))));}previousCPU=cpu;return {cpu:load,ram:os.totalmem(),ramUsed:os.totalmem()-os.freemem()};}
