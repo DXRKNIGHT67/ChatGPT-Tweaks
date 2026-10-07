@@ -1,0 +1,27 @@
+const {app,BrowserWindow,ipcMain,shell}=require('electron');
+const {execFile,spawn}=require('node:child_process');
+const os=require('node:os');const path=require('node:path');const fs=require('node:fs/promises');
+const {tweaks,recommendedIds}=require('./catalog.cjs');
+let busy=false;
+function ps(script){return new Promise((resolve,reject)=>{const child=spawn('powershell.exe',['-NoProfile','-NonInteractive','-Command','-'],{windowsHide:true});let out='',err='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>err+=d);child.on('error',reject);child.on('close',c=>c===0?resolve(out.trim()):reject(new Error(err.trim()||'PowerShell failed')));child.stdin.end("$ErrorActionPreference='Stop'\n"+script+'\n');});}
+const quote=s=>"'"+String(s).replaceAll("'","''")+"'";
+function backupFile(){return path.join(app.getPath('userData'),'registry-backup.json');}
+async function state(){try{return JSON.parse(await fs.readFile(backupFile(),'utf8'));}catch(e){if(e.code==='ENOENT')return {};throw e;}}
+async function save(data){await fs.mkdir(app.getPath('userData'),{recursive:true});const tmp=backupFile()+'.tmp';await fs.writeFile(tmp,JSON.stringify(data,null,2));await fs.rename(tmp,backupFile());}
+async function scan(){if(process.platform!=='win32')return {platform:process.platform,cpu:os.cpus()[0]?.model||'Unknown',cores:os.cpus().length,ram:os.totalmem(),ramUsed:os.totalmem()-os.freemem(),gpu:[],disks:[],os:os.type(),desktop:false,demo:true};const file=await fs.readFile(path.join(__dirname,'../scripts/scan.ps1'),'utf8');return JSON.parse(await ps(file));}
+ipcMain.handle('scan',scan);
+ipcMain.handle('catalog',async()=>({tweaks,active:Object.keys(await state()),windows:process.platform==='win32'}));
+ipcMain.handle('apply',async(_,ids)=>{
+ if(process.platform!=='win32')throw new Error('Applying Windows tweaks requires Windows. This machine provides an interface preview.');
+ if(busy)throw new Error('Another operation is running.');
+ if(!Array.isArray(ids)||ids.length>tweaks.length||ids.some(id=>!tweaks.some(t=>t.id===id)))throw new Error('Invalid selection.');
+ busy=true;const results=[];try{const backups=await state();for(const id of [...new Set(ids)]){const t=tweaks.find(t=>t.id===id);try{
+ if(!backups[id]){const old=JSON.parse(await ps(`$p=${quote(t.path)}; $k=${quote(t.key)}\n$exists=$false; $value=$null; $kind=$null\nif(Test-Path -LiteralPath $p){$r=Get-Item -LiteralPath $p; if($r.GetValueNames() -contains $k){$exists=$true; $value=$r.GetValue($k); $kind=$r.GetValueKind($k).ToString()}}\n@{exists=$exists;value=$value;kind=$kind} | ConvertTo-Json -Compress`));backups[id]={...old,savedAt:new Date().toISOString()};await save(backups);}
+ await ps(`$p=${quote(t.path)}\nif(!(Test-Path -LiteralPath $p)){New-Item -Path $p -Force | Out-Null}\nNew-ItemProperty -LiteralPath $p -Name ${quote(t.key)} -Value ${quote(t.value)} -PropertyType ${quote(t.type)} -Force | Out-Null\n$v=Get-ItemPropertyValue -LiteralPath $p -Name ${quote(t.key)}\nif([string]$v -ne ${quote(t.value)}){throw 'Read-back verification failed'}`);results.push({id,ok:true});
+ }catch(e){results.push({id,ok:false,error:e.message});}}return results;}finally{busy=false;}
+});
+ipcMain.handle('restore',async()=>{if(process.platform!=='win32')throw new Error('Restore requires Windows.');if(busy)throw new Error('Another operation is running.');busy=true;const results=[];try{const backups=await state();for(const [id,b] of Object.entries(backups)){const t=tweaks.find(t=>t.id===id);if(!t)continue;try{await ps(b.exists?`New-ItemProperty -LiteralPath ${quote(t.path)} -Name ${quote(t.key)} -Value (ConvertFrom-Json -InputObject ${quote(JSON.stringify(b.value))}) -PropertyType ${quote(b.kind)} -Force | Out-Null`:`if(Test-Path -LiteralPath ${quote(t.path)}){Remove-ItemProperty -LiteralPath ${quote(t.path)} -Name ${quote(t.key)} -ErrorAction SilentlyContinue}`);delete backups[id];await save(backups);results.push({id,ok:true});}catch(e){results.push({id,ok:false,error:e.message});}}return results;}finally{busy=false;}});
+ipcMain.handle('network',async()=>{const net=require('node:net');return new Promise(resolve=>{const start=performance.now();const socket=net.connect(443,'1.1.1.1');socket.setTimeout(5000);socket.once('connect',()=>{resolve({ms:Math.round(performance.now()-start),target:'Cloudflare 1.1.1.1 TCP/443'});socket.destroy();});socket.once('error',()=>resolve({error:'Network probe unavailable'}));socket.once('timeout',()=>{resolve({error:'Network probe timed out'});socket.destroy();});});});
+ipcMain.handle('settings',(_,section)=>{const allowed={graphics:'ms-settings:display-advancedgraphics',startup:'ms-settings:startupapps',apps:'ms-settings:appsfeatures',network:'ms-settings:network-status',power:'ms-settings:powersleep',gaming:'ms-settings:gaming-gamemode'};if(process.platform==='win32'&&allowed[section])return shell.openExternal(allowed[section]);});
+app.whenReady().then(()=>{const win=new BrowserWindow({width:1440,height:960,minWidth:1050,minHeight:720,backgroundColor:'#080a0f',title:'Agent Tweaks — Your path for glory',icon:path.join(__dirname,'icon.png'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});win.setMenuBarVisibility(false);win.loadFile(path.join(__dirname,'index.html'));win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());});
+app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});
