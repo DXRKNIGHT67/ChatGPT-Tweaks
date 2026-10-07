@@ -8,6 +8,7 @@ The Windows-tested 2.0.0 build is published to GitHub Releases:
 
 - [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/Agent-Tweaks-2.0.0-x64-Setup.exe)
 - [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/Agent-Tweaks-2.0.0-x64-Portable.exe)
+- [Source pack](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/main/downloads/Agent-Tweaks-2.0.0-Source.zip)
 - [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/validation-report.json)
 - [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.0/validation-windows.xml)
 
