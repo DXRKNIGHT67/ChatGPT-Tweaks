@@ -4,7 +4,9 @@ const os=require('node:os');const path=require('node:path');const fs=require('no
 const {tweaks,available,profile}=require('./catalog.cjs');const {Engine,Journal}=require('./engine.cjs');const {WindowsAdapter}=require('./windows-adapter.cjs');const {runPowerShell}=require('./powershell.cjs');const {measure}=require('./network.cjs');
 const index=path.join(__dirname,'index.html');const trustedURL=pathToFileURL(index).href;
 let engine,win,lastScan,networkBusy=false,previousCPU;
-app.setPath('userData',path.join(app.getPath('appData'),'agent-tweaks'));
+const storage=path.join(app.getPath('appData'),'agent-tweaks');
+require('node:fs').mkdirSync(storage,{recursive:true});
+app.setPath('userData',storage);
 function handler(channel,fn){ipcMain.handle(channel,async(event,...args)=>{if(event.senderFrame?.url!==trustedURL)throw new Error('Untrusted application frame');return fn(...args);});}
 async function scan(){lastScan=undefined;if(process.platform!=='win32'){lastScan={platform:process.platform,scanComplete:false,cpu:os.cpus()[0]?.model||'Unknown',cores:os.cpus().length,logicalCores:os.cpus().length,ram:os.totalmem(),ramUsed:os.totalmem()-os.freemem(),gpu:[],disks:[],network:[],powerPlans:[],os:os.type(),desktop:false,preview:true,warnings:['Windows is required to scan GPU/drives and apply optimizations.']};return lastScan;}
  const script=await fs.readFile(path.join(__dirname,'../scripts/scan.ps1'),'utf8');const result=JSON.parse(await runPowerShell(script,{timeout:45000}));if(!result.scanComplete||!result.cpu||!Number.isFinite(result.ram)||result.ram<=0||!Array.isArray(result.gpu)||!Array.isArray(result.disks))throw new Error('Hardware scan returned incomplete data. Applying tweaks is disabled.');lastScan=result;return result;}
