@@ -3,7 +3,7 @@
 ## Completed locally
 
 - Pinned dependency installation completed with verification enabled and the existing HTTPS proxy.
-- 23 unit/regression tests: catalog/profiles, original values/types, backup-before-write, repeated apply, failed writes, failed read-back/removal, external-change conflicts, invalid/exclusive selections, compatibility skips, serialization, persistent/legacy journals, restart recovery, network failures, and measured benchmark validation.
+- 25 unit/regression tests: catalog/profiles, original values/types, backup-before-write, repeated apply, failed writes, failed read-back/removal, external-change conflicts, invalid/exclusive selections, compatibility skips, serialization, persistent/legacy journals, restart recovery, network failures, and measured benchmark validation.
 - Chromium UI smoke checks cover compatible selection, mutually exclusive power plans, filtering, review/cancel, applying through mocked IPC, persistent history, recovery, connection summaries, benchmark validation, and scan-failure lockout.
 - JavaScript syntax checks and diff whitespace validation.
 
