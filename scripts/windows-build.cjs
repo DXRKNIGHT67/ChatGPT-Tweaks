@@ -1,0 +1,10 @@
+'use strict';
+const {spawnSync}=require('node:child_process');const fs=require('node:fs');
+const builder=require.resolve('electron-builder/out/cli/cli.js');
+const result=spawnSync(process.execPath,[builder,'--win','nsis','portable','--x64'],{encoding:'utf8',maxBuffer:12*1024*1024,timeout:600000});
+let text=(result.stdout||'')+'\n'+(result.stderr||'');
+for(const [name,value]of Object.entries(process.env))if(/TOKEN|SECRET|PASSWORD|CERTIFICATE|CSC_LINK/i.test(name)&&value&&value.length>=4)text=text.split(value).join('[REDACTED]');
+text=text.replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/g,'$1[REDACTED]@');
+console.log(text);
+fs.writeFileSync('build-diagnostics.json',JSON.stringify({source:process.env.GITHUB_SHA,status:result.status,error:result.error?.message||null,output:text.slice(-18000)},null,2));
+process.exitCode=result.status??1;
