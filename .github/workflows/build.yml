@@ -32,7 +32,7 @@ jobs:
       - name: Actual Electron desktop startup and protected IPC
         run: node tests/electron.integration.cjs
       - name: Build Windows installer and portable app
-        run: npx electron-builder --win nsis portable --x64
+        run: node scripts/windows-build.cjs
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}

@@ -1,7 +1,7 @@
 'use strict';
 const {spawnSync}=require('node:child_process');const fs=require('node:fs');
 const builder=require.resolve('electron-builder/out/cli/cli.js');
-const result=spawnSync(process.execPath,[builder,'--win','nsis','portable','--x64'],{encoding:'utf8',maxBuffer:12*1024*1024,timeout:600000});
+const result=spawnSync(process.execPath,[builder,'--win','nsis','portable','--x64','--publish','never'],{encoding:'utf8',maxBuffer:12*1024*1024,timeout:600000});
 let text=(result.stdout||'')+'\n'+(result.stderr||'');
 for(const [name,value]of Object.entries(process.env))if(/TOKEN|SECRET|PASSWORD|CERTIFICATE|CSC_LINK/i.test(name)&&value&&value.length>=4)text=text.split(value).join('[REDACTED]');
 text=text.replace(/(https?:\/\/)[^\s/@]+:[^\s/@]+@/g,'$1[REDACTED]@');
