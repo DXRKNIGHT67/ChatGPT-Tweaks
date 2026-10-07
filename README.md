@@ -2,6 +2,17 @@
 
 A Windows desktop performance toolkit with a black-and-blue command center, your actual hardware, a 68-option tweak library, and verified recovery. Version 2 replaces the original engine rather than just changing the interface.
 
+## Validated Windows downloads
+
+Published after the Windows validation workflow succeeds:
+
+- [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/agent-tweaks-v2-release/downloads/Agent-Tweaks-2.0.0-x64-Setup.exe)
+- [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/raw/refs/heads/agent-tweaks-v2-release/downloads/Agent-Tweaks-2.0.0-x64-Portable.exe)
+- [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/blob/agent-tweaks-v2-release/downloads/validation-report.json)
+- [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/blob/agent-tweaks-v2-release/downloads/validation-windows.xml)
+
+Links are available only after a successful publishing job. Unsigned builds can still display browser/SmartScreen warnings. Check the report's signing status; no security protection should be disabled.
+
 ## What improved
 
 - **Hardware-aware profiles:** scans CPU/threads, GPU names/drivers, physical RAM, disk usage, Windows build, network adapters, installed Edge/Office and available power plans. Unsupported settings are disabled. Ryzen and NVIDIA rigs receive targeted guidance.
