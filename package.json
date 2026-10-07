@@ -1,7 +1,7 @@
 {
   "name": "agent-tweaks",
-  "version": "2.0.0",
-  "description": "Agent Tweaks \u2014 Your path for glory",
+  "version": "2.0.1",
+  "description": "Agent Tweaks — Your path for glory",
   "main": "src/main.cjs",
   "author": "Agent Tweaks",
   "license": "MIT",

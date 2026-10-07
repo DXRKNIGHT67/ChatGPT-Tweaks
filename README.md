@@ -59,3 +59,11 @@ No registry pack can guarantee large FPS gains or remove routing/server latency.
 SmartScreen/browser reputation warnings cannot be eliminated with app code. Public releases need a real publisher code-signing certificate and reputation. The workflow can use optional `WINDOWS_CERTIFICATE` and `WINDOWS_CERTIFICATE_PASSWORD` repository secrets for signing; without them it produces an unsigned build and records that fact. It does not claim signing occurred or ask you to disable protection.
 
 See [VALIDATION.md](VALIDATION.md) for current evidence. Preview screenshots use explicit test hardware fixtures and are design examples, not a scan of the build host.
+
+## Startup troubleshooting in 2.0.1
+
+Startup and renderer failures are recorded locally in `%APPDATA%\agent-tweaks\startup.log`, with bounded log rotation. If the window is blank or crashes due to a graphics-driver issue, close the app and launch the installed `Agent Tweaks.exe` with `--software-rendering` to test desktop rendering without GPU acceleration. This flag affects the optimizer window, not game graphics or Windows security. It cannot fix a download or security-policy block.
+
+The release includes `diagnose-windows.ps1`, a read-only Windows PowerShell helper. Run `& '.\diagnose-windows.ps1'` from its folder, optionally with `-ExecutablePath 'C:\path\to\Agent-Tweaks-2.0.1-x64-Setup.exe'`. It prints OS/build, Smart App Control state when readable, Defender status and Agent Tweaks detection IDs, recent app startup messages, and optionally the executable hash/signature. Unavailable checks are identified separately; they do not mean the PC is unprotected. It changes no settings and uploads nothing. Review output before sharing it. If Windows blocks the diagnostic script too, record that message without changing execution policy.
+
+For a blocked download or executable, the exact Windows/browser message or Windows Security Protection history entry is needed. No software change can establish the cause without this evidence. The 2.0.1 changes improve diagnostics and offer a graphics compatibility option; they do not establish that an unidentified block is resolved or provide a signing certificate.
