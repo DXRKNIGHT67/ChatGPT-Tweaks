@@ -1,0 +1,34 @@
+name: Diagnose packaged acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tests/packaged.integration.cjs', '.github/workflows/acceptance-diagnostics.yml']
+permissions:
+  contents: write
+jobs:
+  acceptance:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/windows-build.cjs
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Diagnose installed app
+        continue-on-error: true
+        run: node tests/packaged.integration.cjs
+      - name: Publish acceptance diagnostics
+        shell: pwsh
+        run: |
+          git switch -c agent-tweaks-acceptance-${env:GITHUB_RUN_ID}
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f packaged-acceptance.json
+          git commit -m 'Record Windows packaged acceptance result'
+          git push origin HEAD
