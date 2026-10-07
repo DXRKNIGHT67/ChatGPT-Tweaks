@@ -50,6 +50,13 @@ class Engine {
  delete data.entries[id];await this.journal.write(data);results.push({id,ok:true,status:'restored'});
  }catch(e){results.push({id,ok:false,status:'failed',error:e.message});}}
  data.history=[...(data.history||[]),{time:new Date().toISOString(),operation:'restore',results}].slice(-50);await this.journal.write(data);return results;});}
+ async inspect(){
+  const supported=[];for(const t of this.catalog)if(await this.applicable(t))supported.push(t);
+  let readings;
+  if(this.adapter.readMany){try{readings=await this.adapter.readMany(supported);}catch(e){readings=supported.map(t=>({id:t.id,error:e.message}));}}
+  else{readings=[];for(const t of supported){try{readings.push({id:t.id,state:await this.adapter.read(t)});}catch(e){readings.push({id:t.id,error:e.message});}}}
+  return Object.fromEntries(supported.map(t=>{const r=readings.find(r=>r.id===t.id);return [t.id,!r||r.error||!validState(r.state)?{state:'unknown',error:r?.error||'Setting could not be read'}:{state:same(r.state,desired(t))?'enabled':'off'}];}));
+ }
  async status(){const data=await this.journal.read();return {entries:data.entries,history:data.history||[]};}
 }
 module.exports={Journal,Engine,same,desired,validState};

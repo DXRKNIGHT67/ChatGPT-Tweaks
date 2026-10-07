@@ -37,6 +37,8 @@ jobs:
           npm run test:ui
       - name: Actual Electron desktop startup and protected IPC
         run: node tests/electron.integration.cjs
+      - name: Closing during an operation finishes work before exit
+        run: node tests/electron-close.integration.cjs
       - name: Build Windows installer and portable app
         run: node scripts/windows-build.cjs
         env:
