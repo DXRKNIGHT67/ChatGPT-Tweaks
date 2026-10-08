@@ -1,0 +1,22 @@
+name: Read close-test failure
+on:
+  push:
+    branches: [agent-diagnose-close]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save failed test output
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run view 37676613410 --log-failed > /tmp/agent-close-failure.txt
+          git switch --orphan agent-close-result-202
+          cp /tmp/agent-close-failure.txt failure.txt
+          git add failure.txt
+          git -c user.name='Agent Tweaks' -c user.email='agent-tweaks@users.noreply.github.com' commit -m 'Record Windows close-test failure'
+          git push origin HEAD:agent-close-result-202
