@@ -4,13 +4,13 @@ A Windows desktop performance toolkit with a black-and-blue command center, your
 
 ## Validated Windows downloads
 
-The Windows-tested 2.0.1 build is published to GitHub Releases:
+The Windows-tested 2.0.2 build is published to GitHub Releases:
 
-- [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.1/Agent-Tweaks-2.0.1-x64-Setup.exe)
-- [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.1/Agent-Tweaks-2.0.1-x64-Portable.exe)
-- [Source pack](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/archive/refs/tags/v2.0.1.zip)
-- [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.1/validation-report.json)
-- [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.1/validation-windows.xml)
+- [Windows installer](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.2/Agent-Tweaks-2.0.2-x64-Setup.exe)
+- [Portable Windows app](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.2/Agent-Tweaks-2.0.2-x64-Portable.exe)
+- [Source pack](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/archive/refs/tags/v2.0.2.zip)
+- [Validation and signing report](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.2/validation-report.json)
+- [Windows test results](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/download/v2.0.2/validation-windows.xml)
 
 Links are available only after a successful publishing job. Unsigned builds can still display browser/SmartScreen warnings. Check the report's signing status; no security protection should be disabled.
 

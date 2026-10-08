@@ -3,7 +3,7 @@
 ## Completed locally
 
 - Pinned dependency installation completed with verification enabled and the existing HTTPS proxy.
-- 31 unit/regression tests: catalog/profiles, original values/types, backup-before-write, repeated apply, failed writes, failed read-back/removal, external-change conflicts, invalid/exclusive selections, compatibility skips, serialization, persistent/legacy journals, restart recovery, network failures, and measured benchmark validation.
+- 35 unit/regression tests: catalog/profiles, original values/types, backup-before-write, repeated apply, failed writes, failed read-back/removal, external-change conflicts, invalid/exclusive selections, compatibility skips, serialization, persistent/legacy journals, restart recovery, network failures, and measured benchmark validation.
 - Chromium UI smoke checks cover compatible selection, mutually exclusive power plans, filtering, review/cancel, applying through mocked IPC, persistent history, recovery, connection summaries, benchmark validation, and scan-failure lockout.
 - JavaScript syntax checks and diff whitespace validation.
 
@@ -36,3 +36,11 @@ The verified v2 release is now available at https://github.com/DXRKNIGHT67/ChatG
 [Windows run 37671554455](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/actions/runs/37671554455) passed every step, including publication, for source `476521d337f9f64a9fd2ded7005f6801e5059980`. This includes 31 regression tests, real Windows registry/scanner/power checks, the read-only diagnostic helper, UI tests, native startup, packaged startup, installer installation, installed startup, software-rendering startup, uninstall, and distribution verification. The public installer was subsequently downloaded and its SHA-256 matched against the release checksum file.
 
 Both executables remain `NotSigned`. The release improves failure diagnostics and adds optional software rendering; the user's unidentified download/run block has not been reproduced or confirmed fixed. No game-performance gains have been measured. Reports and downloads: https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/tag/v2.0.1.
+
+## Version 2.0.2
+
+[Windows run 37807490249](https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/actions/runs/37807490249) passed validation and release publication for source `29fa00efd6cb61d2b741143a93015bbe7098a89b`. This includes 35 regression tests, real batched Windows enabled-state detection before and after restoration, UI status/automatic ticks, native startup, and closing/reopening the real Electron window during a controlled operation followed by successful completion and process exit. The window-lifetime test substitutes only the mutation body; separate Windows integration tests exercise real registry operations in isolated test keys.
+
+Packaged startup, installation, installed startup, software-rendering startup and uninstall all passed. The public installer was downloaded and verified against its published SHA-256. Diagnostic queries now have a 15-second timeout each. Release: https://github.com/DXRKNIGHT67/ChatGPT-Tweaks/releases/tag/v2.0.2.
+
+The binaries remain unsigned. This release adds state visibility and background completion, not a claim of measured FPS improvements.
