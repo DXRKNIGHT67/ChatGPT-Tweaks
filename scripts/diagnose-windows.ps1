@@ -3,7 +3,16 @@
 param([string]$ExecutablePath)
 $ErrorActionPreference = 'Stop'
 function Read-Check([scriptblock]$Action) {
-    try { & $Action } catch { @{ unavailable = $_.Exception.Message } }
+    $job = $null
+    try {
+        $boundedAction = [scriptblock]::Create("param(`$ExecutablePath)`n" + $Action.ToString())
+        $job = Start-Job -ScriptBlock $boundedAction -ArgumentList $ExecutablePath
+        if (-not (Wait-Job -Job $job -Timeout 15)) {
+            return @{ unavailable = 'Diagnostic query timed out after 15 seconds.' }
+        }
+        Receive-Job -Job $job -ErrorAction Stop
+    } catch { @{ unavailable = $_.Exception.Message } }
+    finally { if ($null -ne $job) { Remove-Job -Job $job -Force -ErrorAction SilentlyContinue } }
 }
 $report = [ordered]@{
     generatedAt = [DateTime]::UtcNow.ToString('o')
