@@ -23,6 +23,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Engine and profile regression tests
         run: npm test
+      - name: Closing during an operation finishes work before exit
+        run: node tests/electron-close.integration.cjs
       - name: Real Windows scan, registry roundtrip and power plan tests
         run: node --test --test-reporter=junit --test-reporter-destination=validation-windows.xml tests/windows.integration.cjs
       - name: Read-only diagnostic tool
@@ -37,8 +39,6 @@ jobs:
           npm run test:ui
       - name: Actual Electron desktop startup and protected IPC
         run: node tests/electron.integration.cjs
-      - name: Closing during an operation finishes work before exit
-        run: node tests/electron-close.integration.cjs
       - name: Build Windows installer and portable app
         run: node scripts/windows-build.cjs
         env:
