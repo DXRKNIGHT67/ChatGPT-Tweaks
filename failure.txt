@@ -1,0 +1,10 @@
+windows	Closing during an operation finishes work before exit	﻿2026-10-08T16:06:11.8075849Z ##[group]Run node tests/electron-close.integration.cjs
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:11.8076524Z ^[[36;1mnode tests/electron-close.integration.cjs^[[0m
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:11.8146859Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:11.8147334Z ##[endgroup]
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.8464416Z PASS: closing the actual window allows the in-flight operation to finish, then exits. No Windows setting changed.
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.8472469Z TypeError: Cannot read properties of undefined (reading '_object')
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.8473310Z     at clientConnection.toImpl (D:\a\ChatGPT-Tweaks\ChatGPT-Tweaks\node_modules\playwright-core\lib\inProcessFactory.js:53:63)
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.8474280Z     at ElectronApplication.process (D:\a\ChatGPT-Tweaks\ChatGPT-Tweaks\node_modules\playwright-core\lib\client\electron.js:78:37)
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.8475124Z     at D:\a\ChatGPT-Tweaks\ChatGPT-Tweaks\tests\electron-close.integration.cjs:32:69
+windows	Closing during an operation finishes work before exit	2026-10-08T16:06:15.9663090Z ##[error]Process completed with exit code 1.
